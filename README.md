@@ -6,12 +6,13 @@ A simple, interactive command-line AI assistant built using the LangChain framew
 
 - **Interactive CLI Interface**: Chat continuously in a conversational loop.
 - **Multiple Personas**: Switch between different behavior profiles (Teacher, Career Advisor, Code Reviewer) to see how Prompt Templates steer the AI's behavior.
-- **Modular Architecture**: Clean separation between application logic (`assistant.py`) and user interaction (`main.py`).
+- **Modular Architecture**: Clean separation between configuration (`config.py`), prompt management (`prompts.py`), application logic (`assistant.py`), and user interaction (`main.py`).
 - **Environment Management**: Secure API key management via `.env`.
 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
+
 - Python 3.9+
 - A valid Google Gemini API Key
 
@@ -21,12 +22,14 @@ Before you begin, ensure you have the following installed:
    Ensure you are in the project folder.
 
 2. **Set up a Virtual Environment** (Recommended)
+
    ```powershell
    python -m venv .venv
    .\.venv\Scripts\Activate.ps1
    ```
 
 3. **Install Dependencies**
+
    ```powershell
    pip install -r requirements.txt
    ```
@@ -50,13 +53,64 @@ python main.py
 2. **Chat**: Type your queries.
 3. **Exit**: Type `exit` or `quit` when you are done.
 
+## Architecture & Workflow
+
+```mermaid
+flowchart TD
+    A([User Starts App<br>main.py]) --> B{Select Persona}
+    
+    B -->|1. Teacher| C[Persona: Teacher]
+    B -->|2. Career Advisor| D[Persona: Career Advisor]
+    B -->|3. Code Reviewer| E[Persona: Code Reviewer]
+    B -->|4. Default| F[Persona: Default]
+
+    C --> G[Initialize Chain<br>assistant.py]
+    D --> G
+    E --> G
+    F --> G
+
+    subgraph Initialization
+        G --> H[Load Model<br>config.py]
+        H -. ChatGoogleGenerativeAI .-> G
+        G --> I[Load Prompt Template<br>prompts.py]
+        I -. ChatPromptTemplate .-> G
+        G --> J[Build LCEL Chain<br>prompt &#124; model &#124; StrOutputParser]
+    end
+
+    J --> K([Accept User Input])
+
+    K --> L[chain.invoke]
+
+    subgraph LCEL Pipeline Flow
+        L --> M[1. Format Prompt]
+        M --> N[2. Call LLM]
+        N --> O[3. Parse Output]
+    end
+
+    O --> P([Display AI Response])
+    P -. Loop until exit .-> K
+```
+
 ## Project Structure
 
-```
+```text
 .
-├── assistant.py       # Core LangChain logic (Models, Templates, LCEL Chains)
+├── config.py          # Environment variables and Chat Model configuration
+├── prompts.py         # Persona-based system messages and ChatPromptTemplates
+├── assistant.py       # Core LangChain LCEL Chain logic
 ├── main.py            # CLI entry point and user interaction loop
 ├── requirements.txt   # Python dependencies
 ├── .env               # Secret API keys (ignored by git)
 └── .gitignore         # Defines files that Git should ignore
 ```
+## What I learned
+
+This project served as a playground to learn:
+
+- **How to initialize Chat Models** (`ChatGoogleGenerativeAI`).
+- **How to use Prompt Templates** to instruct the LLM programmatically without hardcoding strings.
+- **How to pipeline operations** efficiently using the `|` syntax in LCEL.
+
+---
+
+_Built as part of the AI Engineering Track (Introduction to LangChain)._

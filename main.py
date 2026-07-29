@@ -1,10 +1,7 @@
 import os
-from dotenv import load_dotenv
 from assistant import get_assistant_chain
 
 def main():
-    # 1. Load environment variables (API Key) from the .env file
-    load_dotenv()
     
     print("===========================================")
     print("   Welcome to your LangChain AI Assistant! ")
@@ -31,7 +28,7 @@ def main():
         # Initialize the LangChain LCEL chain for the chosen persona
         chain = get_assistant_chain(selected_persona)
     except Exception as e:
-        print(f"Error initializing assistant: {e}")
+        print(f"Error Initializing Assistant: {e}")
         return
 
     # 2. Accept User Input in a loop
